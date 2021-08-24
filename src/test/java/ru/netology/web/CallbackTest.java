@@ -1,6 +1,5 @@
 package ru.netology.web;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -8,23 +7,27 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CallbackTest {
     private WebDriver driver;
 
     @BeforeAll
-    public static void setupClass() {
-        WebDriverManager.chromedriver().setup();
+    public static void setUpAll() {
+        System.setProperty("webdriver.chrome.driver", "./driver/chromedriver.exe");
     }
 
     @BeforeEach
-    void setUp() {
+    void ChromeOptions() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--no-sandbox");
         options.addArguments("--headless");
         driver = new ChromeDriver(options);
+    }
+
+    @BeforeEach
+    void setUp() {
+        driver = new ChromeDriver();
     }
 
     @AfterEach
@@ -34,7 +37,7 @@ class CallbackTest {
     }
 
     @Test
-    void shouldSendCorrectNameAndPhone () {
+    void shouldSendCorrectNameAndPhone() {
         driver.get("http://localhost:9999");
         driver.findElement(By.cssSelector("[data-test-id='name'] input")).sendKeys("Иванов Иван-Петр");
         driver.findElement(By.cssSelector("[data-test-id='phone'] input")).sendKeys("+79150000000");
@@ -45,7 +48,7 @@ class CallbackTest {
     }
 
     @Test
-    void shouldSendIncorrectName () {
+    void shouldSendIncorrectName() {
         driver.get("http://localhost:9999");
         driver.findElement(By.cssSelector("[data-test-id='name'] input")).sendKeys("-");
         driver.findElement(By.cssSelector("[data-test-id='phone'] input")).sendKeys("+00000000000");
@@ -56,7 +59,7 @@ class CallbackTest {
     }
 
     @Test
-    void shouldSendShortName () {
+    void shouldSendShortName() {
         driver.get("http://localhost:9999");
         driver.findElement(By.cssSelector("[data-test-id='name'] input")).sendKeys("и");
         driver.findElement(By.cssSelector("[data-test-id='phone'] input")).sendKeys("+00000000000");
@@ -116,7 +119,9 @@ class CallbackTest {
         driver.findElement(By.cssSelector("[data-test-id='name'] input")).sendKeys("Иванов Иван-Петр");
         driver.findElement(By.cssSelector("[data-test-id='phone'] input")).sendKeys("+79150000000");
         driver.findElement(By.cssSelector("button")).click();
-        boolean text = driver.findElement(By.cssSelector(".input_invalid .checkbox__box")).isEnabled();
-        assertTrue(text, String.valueOf(true));
+        String expectedText = "Я соглашаюсь с условиями обработки и использования моих персональных данных и разрешаю " +
+                "сделать запрос в бюро кредитных историй";
+        String actualText = driver.findElement(By.cssSelector(".input_invalid .checkbox__text")).getText();
+        assertEquals(expectedText, actualText);
     }
 }
